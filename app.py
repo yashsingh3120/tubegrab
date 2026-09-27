@@ -213,6 +213,45 @@ def is_valid_url(url):
     url = url.strip()
     return bool(re.match(r'^https?:\/\/[^\s/$.?#].[^\s]*$', url, re.IGNORECASE))
 
+def get_yt_dlp_options(extra_opts=None):
+    """Generate resilient yt-dlp configuration with mobile/embedded clients and cookies to bypass bot checks."""
+    opts = {
+        'quiet': True,
+        'no_warnings': True,
+        'ffmpeg_location': FFMPEG_PATH,
+        'http_headers': {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
+            'Accept-Language': 'en-US,en;q=0.9',
+        },
+        'extractor_args': {
+            'youtube': {
+                'player_client': ['android', 'web_embedded', 'ios', 'mweb'],
+                'player_skip': ['configs'],
+            }
+        },
+    }
+
+    # Automatically check for cookies.txt file or YOUTUBE_COOKIES environment variable
+    cookie_file = None
+    if os.path.exists('cookies.txt') and os.path.getsize('cookies.txt') > 0:
+        cookie_file = os.path.abspath('cookies.txt')
+    elif os.environ.get('YOUTUBE_COOKIES'):
+        temp_cookie_path = os.path.join(tempfile.gettempdir(), 'yt_cookies.txt')
+        try:
+            with open(temp_cookie_path, 'w', encoding='utf-8') as f:
+                f.write(os.environ.get('YOUTUBE_COOKIES').strip())
+            cookie_file = temp_cookie_path
+        except Exception:
+            pass
+
+    if cookie_file:
+        opts['cookiefile'] = cookie_file
+
+    if extra_opts:
+        opts.update(extra_opts)
+
+    return opts
+
 def cleanup_transient_files():
     """Background worker that removes temporary files older than 5 minutes."""
     while True:
@@ -376,13 +415,10 @@ def get_video_info():
 
     platform = detect_platform(url)
 
-    ydl_opts = {
-        'quiet': True,
-        'no_warnings': True,
+    ydl_opts = get_yt_dlp_options({
         'skip_download': True,
         'extract_flat': False,
-        'ffmpeg_location': FFMPEG_PATH,
-    }
+    })
 
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -513,6 +549,10 @@ def get_video_info():
 
     except yt_dlp.utils.DownloadError as e:
         msg = str(e)
+        if 'Sign in to confirm' in msg or 'bot' in msg.lower():
+            return jsonify({
+                'error': 'YouTube requested verification for this specific video. Try another link or check cookies setup.'
+            }), 400
         if 'Private' in msg:
             return jsonify({'error': 'This media is private and requires authentication.'}), 400
         if 'not found' in msg.lower() or 'unavailable' in msg.lower():
@@ -575,14 +615,12 @@ def download_worker(task_id, url, download_type, quality, title, trim_start=None
     try:
         raw_tmpl = os.path.join(task_dir, f"raw_{clean_title}.%(ext)s")
         
-        ydl_opts = {
+        base_opts = {
             'outtmpl': raw_tmpl,
             'progress_hooks': [progress_hook],
             'postprocessor_hooks': [postprocessor_hook],
-            'quiet': True,
-            'no_warnings': True,
-            'ffmpeg_location': FFMPEG_PATH,
         }
+        ydl_opts = get_yt_dlp_options(base_opts)
 
         final_ext = 'mp4'
 
