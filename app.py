@@ -214,7 +214,7 @@ def is_valid_url(url):
     return bool(re.match(r'^https?:\/\/[^\s/$.?#].[^\s]*$', url, re.IGNORECASE))
 
 def get_yt_dlp_options(extra_opts=None):
-    """Generate resilient yt-dlp configuration with mobile/embedded clients and cookies to bypass bot checks."""
+    """Generate resilient yt-dlp configuration with auto-fallback and cookies support."""
     opts = {
         'quiet': True,
         'no_warnings': True,
@@ -222,12 +222,6 @@ def get_yt_dlp_options(extra_opts=None):
         'http_headers': {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
             'Accept-Language': 'en-US,en;q=0.9',
-        },
-        'extractor_args': {
-            'youtube': {
-                'player_client': ['android', 'web_embedded', 'ios', 'mweb'],
-                'player_skip': ['configs'],
-            }
         },
     }
 
@@ -251,6 +245,41 @@ def get_yt_dlp_options(extra_opts=None):
         opts.update(extra_opts)
 
     return opts
+
+def extract_media_info_with_fallback(url):
+    """Extract media info with automatic client fallbacks if YouTube or other platform triggers bot checks."""
+    client_fallbacks = [
+        None, # Default smart client
+        {'extractor_args': {'youtube': {'player_client': ['tv_embedded']}}},
+        {'extractor_args': {'youtube': {'player_client': ['android_creator']}}},
+        {'extractor_args': {'youtube': {'player_client': ['android_vr']}}},
+    ]
+    last_exc = None
+    for fb in client_fallbacks:
+        opts = {'skip_download': True, 'extract_flat': False}
+        if fb:
+            opts.update(fb)
+        ydl_opts = get_yt_dlp_options(opts)
+        try:
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                info = ydl.extract_info(url, download=False)
+                if info:
+                    if 'entries' in info and info['entries']:
+                        info = info['entries'][0]
+                    return info
+        except yt_dlp.utils.DownloadError as e:
+            last_exc = e
+            msg = str(e)
+            if 'Sign in' in msg or 'bot' in msg.lower() or 'not available' in msg.lower() or 'reload' in msg.lower():
+                continue
+            raise e
+        except Exception as e:
+            last_exc = e
+            continue
+
+    if last_exc:
+        raise last_exc
+    raise Exception("Failed to retrieve media information from link.")
 
 def cleanup_transient_files():
     """Background worker that removes temporary files older than 5 minutes."""
@@ -415,137 +444,128 @@ def get_video_info():
 
     platform = detect_platform(url)
 
-    ydl_opts = get_yt_dlp_options({
-        'skip_download': True,
-        'extract_flat': False,
-    })
-
     try:
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info = ydl.extract_info(url, download=False)
-            if not info:
-                return jsonify({'error': 'Failed to retrieve media information from this link.'}), 404
+        info = extract_media_info_with_fallback(url)
+        if not info:
+            return jsonify({'error': 'Failed to retrieve media information from this link.'}), 404
 
-            if 'entries' in info and info['entries']:
-                info = info['entries'][0]
+        formats = info.get('formats', [])
+        available_heights = set()
+        duration = info.get('duration', 0)
+        
+        for f in formats:
+            h = f.get('height')
+            vcodec = f.get('vcodec')
+            if h and vcodec and vcodec != 'none':
+                available_heights.add(h)
 
-            formats = info.get('formats', [])
-            available_heights = set()
-            duration = info.get('duration', 0)
-            
-            for f in formats:
-                h = f.get('height')
-                vcodec = f.get('vcodec')
-                if h and vcodec and vcodec != 'none':
-                    available_heights.add(h)
+        target_resolutions = [
+            {'height': 2160, 'label': '4K Ultra HD', 'badge': '4K', 'desc': '2160p • Master Quality'},
+            {'height': 1440, 'label': '2K Quad HD', 'badge': '2K', 'desc': '1440p • Ultra Crisp'},
+            {'height': 1080, 'label': '1080p Full HD', 'badge': '1080p', 'desc': 'Full High Definition'},
+            {'height': 720, 'label': '720p HD', 'badge': '720p', 'desc': 'Standard High Definition'},
+            {'height': 480, 'label': '480p Standard', 'badge': '480p', 'desc': 'Medium Quality'},
+            {'height': 360, 'label': '360p Mobile', 'badge': '360p', 'desc': 'Fast & Lightweight'},
+        ]
 
-            target_resolutions = [
-                {'height': 2160, 'label': '4K Ultra HD', 'badge': '4K', 'desc': '2160p • Master Quality'},
-                {'height': 1440, 'label': '2K Quad HD', 'badge': '2K', 'desc': '1440p • Ultra Crisp'},
-                {'height': 1080, 'label': '1080p Full HD', 'badge': '1080p', 'desc': 'Full High Definition'},
-                {'height': 720, 'label': '720p HD', 'badge': '720p', 'desc': 'Standard High Definition'},
-                {'height': 480, 'label': '480p Standard', 'badge': '480p', 'desc': 'Medium Quality'},
-                {'height': 360, 'label': '360p Mobile', 'badge': '360p', 'desc': 'Fast & Lightweight'},
-            ]
+        video_options = []
+        max_avail = max(available_heights) if available_heights else 720
 
-            video_options = []
-            max_avail = max(available_heights) if available_heights else 720
+        for res in target_resolutions:
+            if any(h >= res['height'] for h in available_heights) or (res['height'] <= max_avail and available_heights):
+                est_bitrate_map = {2160: 15_000_000, 1440: 8_000_000, 1080: 3_500_000, 720: 1_800_000, 480: 900_000, 360: 500_000}
+                est_bytes = (est_bitrate_map.get(res['height'], 1_500_000) / 8) * duration if duration else 0
+                
+                video_options.append({
+                    'quality': str(res['height']),
+                    'label': res['label'],
+                    'badge': res['badge'],
+                    'description': res['desc'],
+                    'format': 'MP4',
+                    'size': format_size(est_bytes) if est_bytes > 0 else 'Variable',
+                })
 
-            for res in target_resolutions:
-                if any(h >= res['height'] for h in available_heights) or (res['height'] <= max_avail and available_heights):
-                    est_bitrate_map = {2160: 15_000_000, 1440: 8_000_000, 1080: 3_500_000, 720: 1_800_000, 480: 900_000, 360: 500_000}
-                    est_bytes = (est_bitrate_map.get(res['height'], 1_500_000) / 8) * duration if duration else 0
-                    
-                    video_options.append({
-                        'quality': str(res['height']),
-                        'label': res['label'],
-                        'badge': res['badge'],
-                        'description': res['desc'],
-                        'format': 'MP4',
-                        'size': format_size(est_bytes) if est_bytes > 0 else 'Variable',
-                    })
+        video_options.insert(0, {
+            'quality': 'best',
+            'label': 'Original Best Quality',
+            'badge': 'Original',
+            'description': 'Direct source stream with sound',
+            'format': 'MP4',
+            'size': 'Original',
+        })
 
-            video_options.insert(0, {
-                'quality': 'best',
-                'label': 'Original Best Quality',
-                'badge': 'Original',
-                'description': 'Direct source stream with sound',
-                'format': 'MP4',
-                'size': 'Original',
-            })
+        audio_options = [
+            {
+                'quality': '320',
+                'label': 'MP3 (320 kbps Studio)',
+                'badge': 'HQ Audio',
+                'description': 'Studio Master Sound • Best Fidelity',
+                'format': 'MP3',
+                'size': format_size((320 * 1000 / 8) * duration) if duration else 'Variable'
+            },
+            {
+                'quality': '192',
+                'label': 'MP3 (192 kbps High Quality)',
+                'badge': 'MP3',
+                'description': 'High Fidelity • Balanced File Size',
+                'format': 'MP3',
+                'size': format_size((192 * 1000 / 8) * duration) if duration else 'Variable'
+            },
+            {
+                'quality': '128',
+                'label': 'MP3 (128 kbps Standard)',
+                'badge': 'MP3',
+                'description': 'Standard Quality • Fast Download',
+                'format': 'MP3',
+                'size': format_size((128 * 1000 / 8) * duration) if duration else 'Variable'
+            },
+            {
+                'quality': 'm4a',
+                'label': 'M4A Audio (Apple AAC)',
+                'badge': 'M4A',
+                'description': 'Original Audio Track • Fast Conversion',
+                'format': 'M4A',
+                'size': format_size((128 * 1000 / 8) * duration) if duration else 'Variable'
+            },
+            {
+                'quality': 'wav',
+                'label': 'WAV Audio (Lossless PCM)',
+                'badge': 'WAV',
+                'description': 'Uncompressed Studio Waveform',
+                'format': 'WAV',
+                'size': format_size((1411 * 1000 / 8) * duration) if duration else 'Variable'
+            },
+            {
+                'quality': 'flac',
+                'label': 'FLAC Audio (Lossless Hi-Fi)',
+                'badge': 'FLAC',
+                'description': 'Audiophile Lossless Compression',
+                'format': 'FLAC',
+                'size': format_size((900 * 1000 / 8) * duration) if duration else 'Variable'
+            }
+        ]
 
-            audio_options = [
-                {
-                    'quality': '320',
-                    'label': 'MP3 (320 kbps Studio)',
-                    'badge': 'HQ Audio',
-                    'description': 'Studio Master Sound • Best Fidelity',
-                    'format': 'MP3',
-                    'size': format_size((320 * 1000 / 8) * duration) if duration else 'Variable'
-                },
-                {
-                    'quality': '192',
-                    'label': 'MP3 (192 kbps High Quality)',
-                    'badge': 'MP3',
-                    'description': 'High Fidelity • Balanced File Size',
-                    'format': 'MP3',
-                    'size': format_size((192 * 1000 / 8) * duration) if duration else 'Variable'
-                },
-                {
-                    'quality': '128',
-                    'label': 'MP3 (128 kbps Standard)',
-                    'badge': 'MP3',
-                    'description': 'Standard Quality • Fast Download',
-                    'format': 'MP3',
-                    'size': format_size((128 * 1000 / 8) * duration) if duration else 'Variable'
-                },
-                {
-                    'quality': 'm4a',
-                    'label': 'M4A Audio (Apple AAC)',
-                    'badge': 'M4A',
-                    'description': 'Original Audio Track • Fast Conversion',
-                    'format': 'M4A',
-                    'size': format_size((128 * 1000 / 8) * duration) if duration else 'Variable'
-                },
-                {
-                    'quality': 'wav',
-                    'label': 'WAV Audio (Lossless PCM)',
-                    'badge': 'WAV',
-                    'description': 'Uncompressed Studio Waveform',
-                    'format': 'WAV',
-                    'size': format_size((1411 * 1000 / 8) * duration) if duration else 'Variable'
-                },
-                {
-                    'quality': 'flac',
-                    'label': 'FLAC Audio (Lossless Hi-Fi)',
-                    'badge': 'FLAC',
-                    'description': 'Audiophile Lossless Compression',
-                    'format': 'FLAC',
-                    'size': format_size((900 * 1000 / 8) * duration) if duration else 'Variable'
-                }
-            ]
+        thumbnail = info.get('thumbnail')
+        thumbnails = info.get('thumbnails', [])
+        if thumbnails:
+            best_thumb = max(thumbnails, key=lambda t: t.get('width', 0) if isinstance(t.get('width'), int) else 0)
+            if best_thumb.get('url'):
+                thumbnail = best_thumb['url']
 
-            thumbnail = info.get('thumbnail')
-            thumbnails = info.get('thumbnails', [])
-            if thumbnails:
-                best_thumb = max(thumbnails, key=lambda t: t.get('width', 0) if isinstance(t.get('width'), int) else 0)
-                if best_thumb.get('url'):
-                    thumbnail = best_thumb['url']
-
-            return jsonify({
-                'title': info.get('title', 'Video Media'),
-                'uploader': info.get('uploader') or info.get('channel') or platform['name'],
-                'uploader_url': info.get('uploader_url') or info.get('channel_url'),
-                'duration': duration,
-                'duration_formatted': format_duration(duration),
-                'views': info.get('view_count', 0),
-                'views_formatted': format_number(info.get('view_count')),
-                'thumbnail': thumbnail,
-                'platform': platform,
-                'video_options': video_options,
-                'audio_options': audio_options,
-                'webpage_url': info.get('webpage_url', url)
-            })
+        return jsonify({
+            'title': info.get('title', 'Video Media'),
+            'uploader': info.get('uploader') or info.get('channel') or platform['name'],
+            'uploader_url': info.get('uploader_url') or info.get('channel_url'),
+            'duration': duration,
+            'duration_formatted': format_duration(duration),
+            'views': info.get('view_count', 0),
+            'views_formatted': format_number(info.get('view_count')),
+            'thumbnail': thumbnail,
+            'platform': platform,
+            'video_options': video_options,
+            'audio_options': audio_options,
+            'webpage_url': info.get('webpage_url', url)
+        })
 
     except yt_dlp.utils.DownloadError as e:
         msg = str(e)
@@ -665,12 +685,37 @@ def download_worker(task_id, url, download_type, quality, title, trim_start=None
             ydl_opts['merge_output_format'] = 'mp4'
             final_ext = 'mp4'
 
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            ydl.download([url])
+        download_success = False
+        last_dl_error = None
+        client_fallbacks = [
+            None, # Default smart client
+            {'extractor_args': {'youtube': {'player_client': ['tv_embedded']}}},
+            {'extractor_args': {'youtube': {'player_client': ['android_creator']}}},
+        ]
 
-        # Find produced file
-        files = [f for f in os.listdir(task_dir) if not f.endswith('.part') and not f.endswith('.ytdl')]
-        if not files:
+        for fb in client_fallbacks:
+            current_opts = dict(ydl_opts)
+            if fb:
+                current_opts.update(fb)
+            try:
+                with yt_dlp.YoutubeDL(current_opts) as ydl:
+                    ydl.download([url])
+                files = [f for f in os.listdir(task_dir) if not f.endswith('.part') and not f.endswith('.ytdl')]
+                if files:
+                    download_success = True
+                    break
+            except Exception as e:
+                last_dl_error = e
+                for f in os.listdir(task_dir):
+                    try:
+                        os.remove(os.path.join(task_dir, f))
+                    except Exception:
+                        pass
+                continue
+
+        if not download_success:
+            if last_dl_error:
+                raise last_dl_error
             raise Exception("No media file was output by the download engine.")
         
         file_path = os.path.join(task_dir, files[0])

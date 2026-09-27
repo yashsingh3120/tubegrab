@@ -9,7 +9,8 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends \
         ffmpeg \
         curl \
-        ca-certificates && \
+        ca-certificates \
+        nodejs && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
