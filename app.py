@@ -253,6 +253,37 @@ def cleanup_transient_files():
 cleanup_thread = threading.Thread(target=cleanup_transient_files, daemon=True)
 cleanup_thread.start()
 
+def keep_alive_self_pinger():
+    """Background worker that pings this service periodically to prevent Render free-tier sleep."""
+    time.sleep(120)
+    while True:
+        try:
+            target = os.environ.get('RENDER_EXTERNAL_URL') or os.environ.get('SELF_PING_URL') or 'https://astradev.tech'
+            if target and target.startswith('http'):
+                ping_url = f"{target.rstrip('/')}/api/ping"
+                req = urllib.request.Request(
+                    ping_url,
+                    headers={'User-Agent': 'TubeGrab-KeepAlive-Worker/1.0'}
+                )
+                with urllib.request.urlopen(req, timeout=20) as resp:
+                    pass
+        except Exception:
+            pass
+        time.sleep(600)  # Ping every 10 minutes (Render sleeps after 15 minutes)
+
+pinger_thread = threading.Thread(target=keep_alive_self_pinger, daemon=True)
+pinger_thread.start()
+
+@app.route('/api/ping')
+def ping():
+    """Lightweight heartbeat endpoint for uptime monitors and keep-alive."""
+    return jsonify({
+        'status': 'ok',
+        'alive': True,
+        'timestamp': time.time(),
+        'service': 'TubeGrab Universal'
+    }), 200
+
 @app.route('/')
 def index():
     return render_template('index.html', local_ip=LOCAL_IP)
