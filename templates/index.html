@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TubeGrab - Universal Free Video & Audio Downloader (All Platforms)</title>
+    <meta name="description" content="Download videos and audio for free from YouTube, Instagram Reels, TikTok without watermark, Twitter/X, Facebook, Reddit, Pinterest, Vimeo, and 1000+ sites in Full HD, 4K MP4 or 320kbps MP3.">
+    <meta name="keywords" content="video downloader, youtube downloader, instagram reels download, tiktok no watermark download, twitter video download, reddit video download, facebook download, mp3 converter">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- QRCode.js for Mobile Scanning -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <!-- Custom Stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=3.2">
+
+    <!-- AdBlock Detection Bait Script -->
+    <script src="{{ url_for('static', filename='js/ads.js') }}?v=3.2"></script>
+
+    <!-- Adsterra Popunder_1 (ANTI-ADBLOCK JS SYNC) -->
+    <script src="https://pl31532410.profitableratecpmnetwork.com/de/01/da/de01daaa7ca7ca642cd8332cd4a4d205.js"></script>
+</head>
+<body>
+    <!-- Background Animated Glow Spheres -->
+    <div class="glow-sphere glow-sphere-1"></div>
+    <div class="glow-sphere glow-sphere-2"></div>
+    <div class="glow-sphere glow-sphere-3"></div>
+
+    <!-- Navigation Bar -->
+    <header class="navbar-wrapper">
+        <nav class="navbar container">
+            <a href="/" class="brand-logo" id="brand-logo">
+                <div class="logo-icon">
+                    <i class="fa-solid fa-play"></i>
+                </div>
+                <div class="brand-text">
+                    <span class="brand-name">Tube<span class="text-gradient">Grab</span></span>
+                    <span class="badge-free">ALL-IN-ONE</span>
+                </div>
+            </a>
+
+            <div class="nav-links">
+                <a href="#downloader" class="nav-link"><i class="fa-solid fa-download"></i> Downloader</a>
+                <a href="#platforms" class="nav-link"><i class="fa-solid fa-layer-group"></i> Platforms</a>
+                <a href="javascript:void(0)" onclick="scrollToTools()" class="nav-link"><i class="fa-solid fa-screwdriver-wrench"></i> Tools</a>
+                <a href="#features" class="nav-link"><i class="fa-solid fa-bolt"></i> Features</a>
+                <a href="#faq" class="nav-link"><i class="fa-solid fa-comments"></i> FAQ</a>
+            </div>
+
+            <div class="nav-actions">
+                <button type="button" class="btn-theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="Toggle Dark/Light Mode">
+                    <i class="fa-solid fa-sun" id="theme-icon"></i>
+                </button>
+                <button type="button" class="btn-purge-cache" onclick="handlePurgeCache()" title="Verify zero disk space used / purge temp cache">
+                    <i class="fa-solid fa-broom"></i>
+                    <span id="cache-status-text">0 MB Stored</span>
+                </button>
+                <a href="#downloader" class="btn-nav-action">
+                    <i class="fa-solid fa-arrow-down"></i>
+                    <span>Download Media</span>
+                </a>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content Area -->
+    <main>
+        <!-- Hero & Downloader Section -->
+        <section class="hero-section" id="downloader">
+            <div class="container hero-container">
+                <div class="pill-announcement animate-fade-in">
+                    <span class="pill-tag"><i class="fa-solid fa-sparkles"></i> Universal Engine</span>
+                    <span class="pill-text">Supports YouTube, Instagram, TikTok, Twitter/X, Reddit, Facebook & 1,000+ Platforms</span>
+                </div>
+
+                <h1 class="hero-title animate-fade-in">
+                    Free Video & Audio Downloader for <span class="text-gradient-fire">All Platforms</span>
+                </h1>
+
+                <p class="hero-subtitle animate-fade-in">
+                    Download videos in <strong>4K, 1080p Full HD MP4</strong> without watermarks, or convert to <strong>320kbps Studio MP3</strong> audio with built-in video trimming and mobile QR transfer.
+                </p>
+
+                <!-- Platform Filter Selector Bar -->
+                <div class="platforms-pill-bar animate-fade-in">
+                    <button type="button" class="platform-filter-pill active" onclick="selectPlatform('all', this)">
+                        <i class="fa-solid fa-globe"></i> All Platforms
+                    </button>
+                    <button type="button" class="platform-filter-pill" onclick="selectPlatform('youtube', this)">
+                        <i class="fa-brands fa-youtube" style="color:#ff0033;"></i> YouTube
+                    </button>
+                    <button type="button" class="platform-filter-pill" onclick="selectPlatform('instagram', this)">
+                        <i class="fa-brands fa-instagram" style="color:#e1306c;"></i> Instagram Reels
+                    </button>
+                    <button type="button" class="platform-filter-pill" onclick="selectPlatform('tiktok', this)">
+                        <i class="fa-brands fa-tiktok" style="color:#00f2fe;"></i> TikTok
+                    </button>
+                    <button type="button" class="platform-filter-pill" onclick="selectPlatform('twitter', this)">
+                        <i class="fa-brands fa-x-twitter" style="color:#1da1f2;"></i> Twitter / X
+                    </button>
+                    <button type="button" class="platform-filter-pill" onclick="selectPlatform('facebook', this)">
+                        <i class="fa-brands fa-facebook" style="color:#1877f2;"></i> Facebook
+                    </button>
+                    <button type="button" class="platform-filter-pill" onclick="selectPlatform('reddit', this)">
+                        <i class="fa-brands fa-reddit" style="color:#ff4500;"></i> Reddit
+                    </button>
+                    <button type="button" class="platform-filter-pill" onclick="selectPlatform('pinterest', this)">
+                        <i class="fa-brands fa-pinterest" style="color:#e60023;"></i> Pinterest
+                    </button>
+                    <button type="button" class="platform-filter-pill" onclick="selectPlatform('soundcloud', this)">
+                        <i class="fa-brands fa-soundcloud" style="color:#ff5500;"></i> SoundCloud
+                    </button>
+                </div>
+
+                <!-- Interactive Quick Tools Toolbar Strip -->
+                <div class="tools-quick-toolbar animate-fade-in" id="tools-toolbar">
+                    <button type="button" class="tool-quick-btn active" id="tool-btn-video" onclick="activateTool('video', this)">
+                        <i class="fa-solid fa-film" style="color:#ff335c;"></i>
+                        <span>Video (MP4)</span>
+                    </button>
+                    <button type="button" class="tool-quick-btn" id="tool-btn-mp3" onclick="activateTool('mp3', this)">
+                        <i class="fa-solid fa-music" style="color:#f59e0b;"></i>
+                        <span>MP3 (320kbps)</span>
+                    </button>
+                    <button type="button" class="tool-quick-btn" id="tool-btn-trimmer" onclick="activateTool('trimmer', this)">
+                        <i class="fa-solid fa-scissors" style="color:#38bdf8;"></i>
+                        <span>Video Trimmer</span>
+                    </button>
+                    <button type="button" class="tool-quick-btn" id="tool-btn-thumbnail" onclick="activateTool('thumbnail', this)">
+                        <i class="fa-regular fa-image" style="color:#10b981;"></i>
+                        <span>HD Thumbnail</span>
+                    </button>
+                    <button type="button" class="tool-quick-btn" id="tool-btn-batch" onclick="activateTool('batch', this)">
+                        <i class="fa-solid fa-layer-group" style="color:#a855f7;"></i>
+                        <span>Batch Download</span>
+                    </button>
+                    <button type="button" class="tool-quick-btn" id="tool-btn-qr" onclick="activateTool('qr', this)">
+                        <i class="fa-solid fa-qrcode" style="color:#06b6d4;"></i>
+                        <span>QR to Mobile</span>
+                    </button>
+                </div>
+
+                <!-- Search / Input Card -->
+                <div class="input-card-wrapper animate-slide-up">
+                    <!-- Mode Switch: Single URL or Batch Mode -->
+                    <div class="mode-switcher-bar">
+                        <button type="button" class="mode-switch-btn active" id="btn-mode-single" onclick="switchInputMode('single')">
+                            <i class="fa-solid fa-link"></i> Single Video
+                        </button>
+                        <button type="button" class="mode-switch-btn" id="btn-mode-batch" onclick="switchInputMode('batch')">
+                            <i class="fa-solid fa-list-check"></i> Batch Multi-Link
+                        </button>
+                    </div>
+
+                    <!-- Single URL Form -->
+                    <form id="fetch-form" class="url-input-form" onsubmit="event.preventDefault(); handleFetchVideo();">
+                        <div class="input-group">
+                            <span class="input-icon" id="input-platform-icon">
+                                <i class="fa-solid fa-link"></i>
+                            </span>
+                            
+                            <input 
+                                type="url" 
+                                id="youtube-url-input" 
+                                class="url-input" 
+                                placeholder="Paste video link here (YouTube, Instagram, TikTok, Twitter/X, Reddit, etc.)" 
+                                autocomplete="off"
+                                required
+                            >
+                            
+                            <div class="input-action-buttons">
+                                <button type="button" id="btn-paste" class="btn-icon-action" title="Paste from clipboard" onclick="handlePasteClipboard()">
+                                    <i class="fa-regular fa-clipboard"></i>
+                                    <span>Paste</span>
+                                </button>
+                                <button type="button" id="btn-clear" class="btn-icon-action btn-clear-hidden" title="Clear input" onclick="handleClearInput()">
+                                    <i class="fa-solid fa-xmark"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <button type="submit" id="btn-fetch" class="btn-submit-fetch">
+                            <span class="btn-text">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                                <span>Fetch Media</span>
+                            </span>
+                            <span class="btn-spinner" style="display: none;">
+                                <i class="fa-solid fa-spinner fa-spin"></i>
+                                <span>Analyzing...</span>
+                            </span>
+                        </button>
+                    </form>
+
+                    <!-- Batch Multi-Link Form (Hidden by default) -->
+                    <div id="batch-form-wrapper" class="batch-form-wrapper" style="display: none;">
+                        <textarea 
+                            id="batch-urls-input" 
+                            class="batch-textarea" 
+                            rows="4" 
+                            placeholder="Paste multiple video URLs here (one URL per line)&#10;https://www.youtube.com/watch?v=...&#10;https://www.instagram.com/reel/...&#10;https://www.tiktok.com/@.../video/..."
+                        ></textarea>
+                        <div class="batch-actions-row">
+                            <span class="batch-hint"><i class="fa-solid fa-circle-info"></i> Process up to 5 links sequentially at max speed</span>
+                            <button type="button" class="btn-submit-fetch" onclick="handleBatchDownload()">
+                                <i class="fa-solid fa-layer-group"></i>
+                                <span>Process Batch</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Quick Sample Links -->
+                    <div class="quick-samples" id="quick-samples-box">
+                        <span class="samples-label"><i class="fa-solid fa-wand-magic-sparkles"></i> Try sample links:</span>
+                        <button type="button" class="sample-tag" onclick="loadSample('https://www.youtube.com/watch?v=dQw4w9WgXcQ')">
+                            <i class="fa-brands fa-youtube" style="color:#ff0033;"></i> YouTube Classic
+                        </button>
+                        <button type="button" class="sample-tag" onclick="loadSample('https://www.youtube.com/watch?v=jNQXAC9IVRw')">
+                            <i class="fa-brands fa-youtube" style="color:#ff0033;"></i> YouTube First Video
+                        </button>
+                    </div>
+
+                    <!-- Error Alert Banner -->
+                    <div id="error-alert" class="alert-banner alert-error" style="display: none;">
+                        <i class="fa-solid fa-circle-exclamation alert-icon"></i>
+                        <div class="alert-content">
+                            <span class="alert-title">Notice</span>
+                            <span id="error-message" class="alert-text">An error occurred.</span>
+                        </div>
+                        <button type="button" class="alert-close" onclick="dismissError()">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Adsterra 728x90 Leaderboard Banner -->
+                <div class="ad-unit-wrapper animate-fade-in">
+                    <span class="ad-label">Sponsored Advertisement</span>
+                    <script>
+                      atOptions = {
+                        'key' : 'b563263394476eceb4cc91b9ed72a5db',
+                        'format' : 'iframe',
+                        'height' : 90,
+                        'width' : 728,
+                        'params' : {}
+                      };
+                    </script>
+                    <script src="https://www.highrevenueformat.com/b563263394476eceb4cc91b9ed72a5db/invoke.js"></script>
+                </div>
+
+                <!-- Skeleton Loader while fetching -->
+                <div id="skeleton-loader" class="preview-skeleton-card" style="display: none;">
+                    <div class="skeleton-thumb"></div>
+                    <div class="skeleton-details">
+                        <div class="skeleton-line skeleton-title"></div>
+                        <div class="skeleton-line skeleton-meta"></div>
+                        <div class="skeleton-tabs">
+                            <div class="skeleton-tab"></div>
+                            <div class="skeleton-tab"></div>
+                        </div>
+                        <div class="skeleton-line skeleton-row"></div>
+                        <div class="skeleton-line skeleton-row"></div>
+                    </div>
+                </div>
+
+                <!-- Video Result Card (Fades in when info is fetched) -->
+                <div id="result-card" class="result-card" style="display: none;">
+                    <div class="result-header">
+                        <div class="video-thumbnail-box">
+                            <img id="res-thumbnail" src="" alt="Media Thumbnail" class="video-thumbnail">
+                            <div class="duration-badge">
+                                <i class="fa-regular fa-clock"></i>
+                                <span id="res-duration">00:00</span>
+                            </div>
+                            <div class="thumbnail-overlay">
+                                <a id="res-watch-link" href="#" target="_blank" rel="noopener noreferrer" class="btn-play-preview" title="Open Original Source">
+                                    <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="video-meta-box">
+                            <!-- Platform Badge -->
+                            <div class="meta-top-badges">
+                                <span id="res-platform-badge" class="platform-source-badge">
+                                    <i class="fa-solid fa-globe"></i>
+                                    <span>Web Video</span>
+                                </span>
+                                <span class="creator-item quality-flag">
+                                    <i class="fa-solid fa-shield-halved"></i>
+                                    <span>Direct Stream Verified</span>
+                                </span>
+                            </div>
+
+                            <h2 id="res-title" class="video-title">Media Title</h2>
+                            
+                            <div class="video-creator-meta">
+                                <span class="creator-item channel-item">
+                                    <i class="fa-solid fa-circle-check"></i>
+                                    <span id="res-uploader">Creator</span>
+                                </span>
+                                <span class="creator-item views-item" id="res-views-wrapper">
+                                    <i class="fa-regular fa-eye"></i>
+                                    <span id="res-views">0 views</span>
+                                </span>
+                            </div>
+
+                            <!-- Extra Quick Action Buttons -->
+                            <div class="media-quick-actions">
+                                <button type="button" class="btn-media-subaction" id="btn-download-thumb" onclick="downloadCoverImage()">
+                                    <i class="fa-regular fa-image"></i>
+                                    <span>Download HD Cover / Thumbnail</span>
+                                </button>
+                                <button type="button" class="btn-media-subaction" onclick="toggleTrimmer()">
+                                    <i class="fa-solid fa-scissors"></i>
+                                    <span id="trimmer-toggle-label">Trim / Cut Clip</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Built-in Video Trimmer Accordion Panel -->
+                    <div id="trimmer-panel" class="trimmer-panel" style="display: none;">
+                        <div class="trimmer-header">
+                            <div class="trimmer-title">
+                                <i class="fa-solid fa-scissors" style="color:var(--yt-red);"></i>
+                                <span>Trim Video Segment (Optional)</span>
+                            </div>
+                            <span class="trimmer-hint">Only download the exact part of the video you want</span>
+                        </div>
+                        <div class="trimmer-inputs-row">
+                            <div class="trim-input-group">
+                                <label for="trim-start"><i class="fa-solid fa-play"></i> Start Time (MM:SS):</label>
+                                <input type="text" id="trim-start" placeholder="00:00" value="00:00" class="trim-field" oninput="validateTrim()">
+                            </div>
+                            <div class="trim-input-group">
+                                <label for="trim-end"><i class="fa-solid fa-stop"></i> End Time (MM:SS):</label>
+                                <input type="text" id="trim-end" placeholder="01:00" class="trim-field" oninput="validateTrim()">
+                            </div>
+                            <div class="trim-apply-info">
+                                <span class="trim-status-badge" id="trim-summary-badge">Trimming active</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quality Format Selector Tabs -->
+                    <div class="format-tabs-wrapper">
+                        <div class="tab-buttons">
+                            <button type="button" id="tab-video" class="tab-btn active" onclick="switchFormatTab('video')">
+                                <i class="fa-solid fa-film"></i>
+                                <span>Video (MP4 / HD)</span>
+                                <span class="tab-count" id="video-count">5</span>
+                            </button>
+                            <button type="button" id="tab-audio" class="tab-btn" onclick="switchFormatTab('audio')">
+                                <i class="fa-solid fa-music"></i>
+                                <span>Audio (MP3 / WAV / Lossless)</span>
+                                <span class="tab-count" id="audio-count">6</span>
+                            </button>
+                        </div>
+
+                        <!-- Video Options Panel -->
+                        <div id="panel-video" class="format-panel active">
+                            <div class="format-table-header">
+                                <span>Resolution</span>
+                                <span>Format</span>
+                                <span>File Size</span>
+                                <span>Action</span>
+                            </div>
+                            <div id="video-options-list" class="format-list">
+                                <!-- Dynamic rows generated by JS -->
+                            </div>
+                        </div>
+
+                        <!-- Audio Options Panel -->
+                        <div id="panel-audio" class="format-panel" style="display: none;">
+                            <div class="format-table-header">
+                                <span>Audio Quality</span>
+                                <span>Format</span>
+                                <span>Bitrate / Type</span>
+                                <span>Action</span>
+                            </div>
+                            <div id="audio-options-list" class="format-list">
+                                <!-- Dynamic rows generated by JS -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Adsterra Native Banner Container -->
+                <div class="ad-unit-wrapper ad-unit-inline" id="ad-native-wrapper">
+                    <span class="ad-label">Recommended Sponsored Content</span>
+                    <script async="async" data-cfasync="false" src="https://pl31532411.profitableratecpmnetwork.com/4355ded4b30abeef92ff0215472c30d9/invoke.js"></script>
+                    <div id="container-4355ded4b30abeef92ff0215472c30d9"></div>
+                </div>
+
+                <!-- Active Download Progress Modal / Card -->
+                <div id="download-progress-card" class="download-progress-card" style="display: none;">
+                    <div class="progress-card-inner">
+                        <div class="progress-status-header">
+                            <div class="status-icon-wrapper" id="progress-icon-box">
+                                <i class="fa-solid fa-circle-notch fa-spin status-icon-spin"></i>
+                            </div>
+                            <div class="status-meta">
+                                <h3 id="progress-headline" class="progress-headline">Preparing Your Download</h3>
+                                <p id="progress-submessage" class="progress-submessage">Contacting stream servers...</p>
+                            </div>
+                            <div class="status-percent">
+                                <span id="progress-number">0</span>%
+                            </div>
+                        </div>
+
+                        <!-- Progress Bar Container -->
+                        <div class="progress-bar-track">
+                            <div id="progress-bar-fill" class="progress-bar-fill" style="width: 0%;"></div>
+                        </div>
+
+                        <!-- Progress Stats -->
+                        <div class="progress-stats-row">
+                            <div class="stat-col">
+                                <span class="stat-label">Transfer Speed</span>
+                                <span id="stat-speed" class="stat-value">Connecting...</span>
+                            </div>
+                            <div class="stat-col">
+                                <span class="stat-label">Estimated Time</span>
+                                <span id="stat-eta" class="stat-value">A few seconds</span>
+                            </div>
+                            <div class="stat-col">
+                                <span class="stat-label">Format / Engine</span>
+                                <span id="stat-format" class="stat-value">MP4 (FFmpeg)</span>
+                            </div>
+                        </div>
+
+                        <!-- Completed Action Buttons -->
+                        <div id="download-ready-box" class="download-ready-box" style="display: none;">
+                            <div class="ready-badge">
+                                <i class="fa-solid fa-circle-check"></i>
+                                <span>Processing Complete! Ready to Save.</span>
+                            </div>
+                            <div class="ready-actions">
+                                <a id="btn-save-file" href="#" class="btn-save-download" download>
+                                    <i class="fa-solid fa-file-arrow-down"></i>
+                                    <span>Save File to Device</span>
+                                </a>
+                                <a href="https://www.profitableratecpmnetwork.com/wd6g7ehp?key=6d66eb42492c2d0ab4ee92cef7b2b5bb" target="_blank" rel="noopener noreferrer" class="btn-smartlink-sponsored" title="Sponsored High Speed Mirror">
+                                    <i class="fa-solid fa-bolt"></i>
+                                    <span>High Speed Link (Ad)</span>
+                                </a>
+                                <button type="button" class="btn-qr-action" onclick="showQrModal()">
+                                    <i class="fa-solid fa-qrcode"></i>
+                                    <span>Get on Phone</span>
+                                </button>
+                                <button type="button" class="btn-another-download" onclick="resetToNewDownload()">
+                                    <i class="fa-solid fa-rotate-right"></i>
+                                    <span>Download Another</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Downloads History Section -->
+                <div id="history-section" class="history-section" style="display: none;">
+                    <div class="history-header">
+                        <div class="history-title">
+                            <i class="fa-solid fa-clock-rotate-left"></i>
+                            <span>Recent Downloads</span>
+                        </div>
+                        <button type="button" class="btn-clear-history" onclick="clearHistory()">Clear History</button>
+                    </div>
+                    <div id="history-list" class="history-grid">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Supported Platforms Showcase Section -->
+        <section class="platforms-showcase-section" id="platforms">
+            <div class="container">
+                <div class="section-badge">SUPPORTED PLATFORMS</div>
+                <h2 class="section-title">All Your Favorite Platforms in One Place</h2>
+                <p class="section-subtitle">No need for 10 different downloader apps. Save videos and audio from anywhere on the web.</p>
+
+                <div class="platforms-grid">
+                    <div class="platform-card" onclick="selectPlatform('youtube')">
+                        <div class="platform-logo-box" style="background: rgba(255, 0, 51, 0.15); color: #ff0033;">
+                            <i class="fa-brands fa-youtube"></i>
+                        </div>
+                        <h3>YouTube Downloader</h3>
+                        <p>Videos, Shorts, Live Replays, Music, Playlists up to 4K 60fps.</p>
+                        <span class="platform-link-tag">MP4 & MP3 Available</span>
+                    </div>
+
+                    <div class="platform-card" onclick="selectPlatform('instagram')">
+                        <div class="platform-logo-box" style="background: rgba(225, 48, 108, 0.15); color: #e1306c;">
+                            <i class="fa-brands fa-instagram"></i>
+                        </div>
+                        <h3>Instagram Reels</h3>
+                        <p>Save viral Instagram Reels, Posts, and Carousels in original HD quality.</p>
+                        <span class="platform-link-tag">Original MP4 Quality</span>
+                    </div>
+
+                    <div class="platform-card" onclick="selectPlatform('tiktok')">
+                        <div class="platform-logo-box" style="background: rgba(0, 242, 254, 0.15); color: #00f2fe;">
+                            <i class="fa-brands fa-tiktok"></i>
+                        </div>
+                        <h3>TikTok Without Watermark</h3>
+                        <p>Download clean TikTok videos with zero watermark and original audio.</p>
+                        <span class="platform-link-tag">No Watermark HD</span>
+                    </div>
+
+                    <div class="platform-card" onclick="selectPlatform('twitter')">
+                        <div class="platform-logo-box" style="background: rgba(29, 161, 242, 0.15); color: #1da1f2;">
+                            <i class="fa-brands fa-x-twitter"></i>
+                        </div>
+                        <h3>Twitter / X Downloader</h3>
+                        <p>Grab tweets containing videos, clips, and animated GIFs in Full HD.</p>
+                        <span class="platform-link-tag">Instant MP4 Grab</span>
+                    </div>
+
+                    <div class="platform-card" onclick="selectPlatform('facebook')">
+                        <div class="platform-logo-box" style="background: rgba(24, 119, 242, 0.15); color: #1877f2;">
+                            <i class="fa-brands fa-facebook"></i>
+                        </div>
+                        <h3>Facebook Watch & Reels</h3>
+                        <p>Download public Facebook video posts, news clips, and mobile Reels.</p>
+                        <span class="platform-link-tag">High Bitrate</span>
+                    </div>
+
+                    <div class="platform-card" onclick="selectPlatform('reddit')">
+                        <div class="platform-logo-box" style="background: rgba(255, 69, 0, 0.15); color: #ff4500;">
+                            <i class="fa-brands fa-reddit"></i>
+                        </div>
+                        <h3>Reddit Video with Audio</h3>
+                        <p>Solves Reddit's audio/video separation by auto-merging sound into the MP4.</p>
+                        <span class="platform-link-tag">Auto-Muxed Sound</span>
+                    </div>
+
+                    <div class="platform-card" onclick="selectPlatform('pinterest')">
+                        <div class="platform-logo-box" style="background: rgba(230, 0, 35, 0.15); color: #e60023;">
+                            <i class="fa-brands fa-pinterest"></i>
+                        </div>
+                        <h3>Pinterest Video Pins</h3>
+                        <p>Save aesthetic Pinterest video pins, tutorials, and DIY clips easily.</p>
+                        <span class="platform-link-tag">Direct Video File</span>
+                    </div>
+
+                    <div class="platform-card" onclick="selectPlatform('soundcloud')">
+                        <div class="platform-logo-box" style="background: rgba(255, 85, 0, 0.15); color: #ff5500;">
+                            <i class="fa-brands fa-soundcloud"></i>
+                        </div>
+                        <h3>SoundCloud & Podcasts</h3>
+                        <p>Extract high fidelity MP3 tracks from SoundCloud, Bandcamp, and Vimeo.</p>
+                        <span class="platform-link-tag">320kbps MP3</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Feature Grid Section -->
+        <section class="features-section" id="features">
+            <div class="container">
+                <div class="section-badge">POWERFUL TOOLS</div>
+                <h2 class="section-title">Everything Built For Your Convenience</h2>
+                <p class="section-subtitle">More than just a downloader: a complete toolkit to cut, convert, and transfer media.</p>
+
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon feature-icon-red">
+                            <i class="fa-solid fa-scissors"></i>
+                        </div>
+                        <h3>Built-in Video Trimmer</h3>
+                        <p>Set a start and end timestamp to clip only the segment you want, saving bandwidth and download time.</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon feature-icon-blue">
+                            <i class="fa-solid fa-qrcode"></i>
+                        </div>
+                        <h3>Scan to Mobile (QR Code)</h3>
+                        <p>Finished downloading on PC? Scan the instant QR code with your phone camera to download directly onto iOS or Android.</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon feature-icon-purple">
+                            <i class="fa-solid fa-headphones"></i>
+                        </div>
+                        <h3>Lossless Audio (MP3, WAV, FLAC)</h3>
+                        <p>Choose from Studio 320kbps MP3, original Apple M4A, or uncompressed Lossless WAV/FLAC audio.</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon feature-icon-green">
+                            <i class="fa-solid fa-image"></i>
+                        </div>
+                        <h3>HD Cover Art & Thumbnail</h3>
+                        <p>One-click grabber for maximum resolution cover images, video thumbnails, and album artwork.</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon feature-icon-orange">
+                            <i class="fa-solid fa-layer-group"></i>
+                        </div>
+                        <h3>Batch Multi-Link Queue</h3>
+                        <p>Need to download multiple clips? Paste several links at once and let the engine download them in sequence.</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon feature-icon-cyan">
+                            <i class="fa-solid fa-shield-check"></i>
+                        </div>
+                        <h3>100% Free • No Registration</h3>
+                        <p>No forced accounts, no credit cards, and zero ads. Download as much as you need freely.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- How It Works Section -->
+        <section class="how-section" id="how-it-works">
+            <div class="container">
+                <div class="section-badge">EASY 3 STEPS</div>
+                <h2 class="section-title">How to Download Any Video</h2>
+                <p class="section-subtitle">Get your content saved in under 30 seconds with these simple steps.</p>
+
+                <div class="steps-grid">
+                    <div class="step-card">
+                        <div class="step-number">01</div>
+                        <div class="step-icon">
+                            <i class="fa-regular fa-copy"></i>
+                        </div>
+                        <h3>Copy Link</h3>
+                        <p>Copy the link of any video from YouTube, Instagram, TikTok, Twitter/X, or any supported platform.</p>
+                    </div>
+
+                    <div class="step-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+
+                    <div class="step-card">
+                        <div class="step-number">02</div>
+                        <div class="step-icon">
+                            <i class="fa-solid fa-sliders"></i>
+                        </div>
+                        <h3>Paste & Customize</h3>
+                        <p>Paste the link above, pick your resolution or audio format, and optionally set a trim duration.</p>
+                    </div>
+
+                    <div class="step-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+
+                    <div class="step-card">
+                        <div class="step-number">03</div>
+                        <div class="step-icon">
+                            <i class="fa-solid fa-circle-down"></i>
+                        </div>
+                        <h3>Download or Scan</h3>
+                        <p>Save directly to your computer or scan the QR code to send the file straight to your phone!</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FAQ Section -->
+        <section class="faq-section" id="faq">
+            <div class="container">
+                <div class="section-badge">QUESTIONS & ANSWERS</div>
+                <h2 class="section-title">Frequently Asked Questions</h2>
+                <p class="section-subtitle">Everything you need to know about downloading across all platforms.</p>
+
+                <div class="faq-accordion">
+                    <div class="faq-item active">
+                        <button type="button" class="faq-question" onclick="toggleFaq(this)">
+                            <span>Which platforms can I download videos and audio from?</span>
+                            <i class="fa-solid fa-chevron-down"></i>
+                        </button>
+                        <div class="faq-answer">
+                            <p>TubeGrab supports over 1,000 video and audio hosting sites, including YouTube (Shorts & 4K), Instagram Reels, TikTok (no watermark), Twitter/X, Facebook, Reddit, Pinterest, Vimeo, SoundCloud, Twitch, and direct MP4/M3U8 media links.</p>
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <button type="button" class="faq-question" onclick="toggleFaq(this)">
+                            <span>How do I download TikTok videos without watermark?</span>
+                            <i class="fa-solid fa-chevron-down"></i>
+                        </button>
+                        <div class="faq-answer">
+                            <p>Simply paste the TikTok video link into TubeGrab and click "Fetch Media". Our download engine automatically fetches the original stream straight from TikTok's CDN without the bouncing watermark overlay.</p>
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <button type="button" class="faq-question" onclick="toggleFaq(this)">
+                            <span>How does the Video Trimmer work?</span>
+                            <i class="fa-solid fa-chevron-down"></i>
+                        </button>
+                        <div class="faq-answer">
+                            <p>After fetching video info, click the "Trim / Cut Clip" button. Enter your desired Start Time (e.g. 00:15) and End Time (e.g. 00:45). When you click Download, our built-in FFmpeg engine trims the exact segment before providing your download!</p>
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <button type="button" class="faq-question" onclick="toggleFaq(this)">
+                            <span>How do I transfer the downloaded video to my phone?</span>
+                            <i class="fa-solid fa-chevron-down"></i>
+                        </button>
+                        <div class="faq-answer">
+                            <p>When the download completes, click "Get on Phone". A QR code appears on your screen. Point your iPhone or Android camera at the QR code and tap the link to download the file directly onto your phone.</p>
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <button type="button" class="faq-question" onclick="toggleFaq(this)">
+                            <span>What audio formats can I extract?</span>
+                            <i class="fa-solid fa-chevron-down"></i>
+                        </button>
+                        <div class="faq-answer">
+                            <p>You can download audio in Studio 320 kbps MP3, 192 kbps MP3, 128 kbps MP3, Apple AAC M4A, as well as Lossless uncompressed WAV and Lossless FLAC for audiophiles.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- QR Code Modal Dialog -->
+    <div id="qr-modal" class="modal-backdrop" style="display: none;" onclick="closeQrModal(event)">
+        <div class="modal-card" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <div class="modal-title">
+                    <i class="fa-solid fa-mobile-screen" style="color:var(--yt-red);"></i>
+                    <span>Scan to Download on Phone</span>
+                </div>
+                <button type="button" class="modal-close" onclick="closeQrModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="qr-code-box" class="qr-code-box"></div>
+                <p class="qr-hint">Scan this QR code with your iPhone or Android camera to save this video directly to your mobile device.</p>
+                <div class="qr-url-box">
+                    <input type="text" id="qr-url-display" readonly class="qr-url-input">
+                    <button type="button" class="btn-copy-url" onclick="copyDownloadUrl()">Copy</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AdBlock Detection Wall Modal -->
+    <div id="adblock-modal" class="modal-backdrop" style="display: none;">
+        <div class="modal-card adblock-modal-card" onclick="event.stopPropagation()">
+            <div class="adblock-icon-circle">
+                <i class="fa-solid fa-shield-halved"></i>
+            </div>
+            <h3 class="adblock-modal-title">AdBlocker Detected</h3>
+            <p class="adblock-modal-desc">
+                We noticed you are using an <strong>AdBlocker</strong> or private shield.
+                <strong>TubeGrab</strong> is 100% free and relies on unobtrusive ads to fund high-speed servers and FFmpeg processing.
+            </p>
+
+            <div class="adblock-guide-box">
+                <h4><i class="fa-solid fa-circle-check"></i> How to disable in 5 seconds:</h4>
+                <ol class="adblock-steps-list">
+                    <li>Click your AdBlock icon (uBlock, AdBlock, Brave, etc.) in your browser extensions bar.</li>
+                    <li>Click <strong>"Don't run on this site"</strong> or toggle it <strong>OFF</strong>.</li>
+                    <li>Click the refresh button below to unlock your downloads!</li>
+                </ol>
+            </div>
+
+            <div class="adblock-actions">
+                <button type="button" class="btn-adblock-refresh" onclick="recheckAdblock()">
+                    <i class="fa-solid fa-rotate-right"></i>
+                    <span>I've Whitelisted TubeGrab • Unlock Now</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Invisible Honeypot Element for CSS AdBlock Detection -->
+    <div id="ad-honeypot" class="adsbox ad-banner adsbygoogle pub_300x250" style="position: absolute; left: -9999px; top: -9999px; width: 1px; height: 1px;"></div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container footer-container">
+            <div class="footer-top">
+                <div class="footer-brand">
+                    <div class="brand-logo">
+                        <div class="logo-icon">
+                            <i class="fa-solid fa-play"></i>
+                        </div>
+                        <span class="brand-name">Tube<span class="text-gradient">Grab</span></span>
+                    </div>
+                    <p class="footer-desc">The universal, free video and audio downloader for YouTube, Instagram, TikTok, Twitter/X, Reddit, Facebook, and more.</p>
+                </div>
+
+                <div class="footer-links-group">
+                    <div class="footer-col">
+                        <h4>Platforms</h4>
+                        <a href="javascript:void(0)" onclick="activatePlatform('youtube')">YouTube Downloader</a>
+                        <a href="javascript:void(0)" onclick="activatePlatform('instagram')">Instagram Reels</a>
+                        <a href="javascript:void(0)" onclick="activatePlatform('tiktok')">TikTok No Watermark</a>
+                        <a href="javascript:void(0)" onclick="activatePlatform('twitter')">Twitter / X Clips</a>
+                        <a href="javascript:void(0)" onclick="activatePlatform('reddit')">Reddit with Audio</a>
+                    </div>
+                    <div class="footer-col">
+                        <h4>Tools</h4>
+                        <a href="javascript:void(0)" onclick="activateTool('trimmer')">Video Trimmer</a>
+                        <a href="javascript:void(0)" onclick="activateTool('thumbnail')">Thumbnail Grabber</a>
+                        <a href="javascript:void(0)" onclick="activateTool('qr')">QR Mobile Transfer</a>
+                        <a href="javascript:void(0)" onclick="activateTool('mp3')">320kbps MP3 Converter</a>
+                        <a href="javascript:void(0)" onclick="activateTool('batch')">Batch Download</a>
+                    </div>
+                    <div class="footer-col">
+                        <h4>About</h4>
+                        <a href="javascript:void(0)" onclick="scrollToFaq()">FAQ</a>
+                        <a href="javascript:void(0)" onclick="openPrivacyModal()">Privacy Policy</a>
+                        <a href="javascript:void(0)" onclick="openTermsModal()">Terms of Service</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; 2026 TubeGrab Universal. All rights reserved. Intended for personal backup and educational use.</p>
+                <div class="footer-status">
+                    <span class="status-dot"></span>
+                    <span>All 1,000+ Platforms Operational</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Privacy Policy Modal -->
+    <div id="privacy-modal" class="modal-backdrop" style="display: none;" onclick="closePrivacyModal(event)">
+        <div class="modal-card legal-modal-card" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <div class="modal-title">
+                    <i class="fa-solid fa-user-shield" style="color:var(--yt-red);"></i>
+                    <span>Privacy Policy</span>
+                </div>
+                <button type="button" class="modal-close" onclick="closePrivacyModal()">&times;</button>
+            </div>
+            <div class="legal-modal-body">
+                <p><strong>Effective Date:</strong> January 2026 • <strong>Website:</strong> astradev.tech</p>
+                <h4>1. Information We Collect</h4>
+                <p>TubeGrab does not require any account registration, email addresses, credit cards, or personal identification. We do not store downloaded files or personal browsing history on our servers. All media processing files are transient and purged immediately upon delivery.</p>
+                <h4>2. Zero Server Storage Policy</h4>
+                <p>All downloaded content is streamed directly to your browser's local Downloads folder. Our servers operate a strict zero-retention policy where temporary processing chunks in OS memory are permanently wiped immediately after file transfer.</p>
+                <h4>3. Cookies and Advertising</h4>
+                <p>We work with trusted third-party advertising partners (such as Adsterra) to serve non-intrusive ads that fund our free high-speed bandwidth. These partners may use anonymous cookies to measure ad performance in compliance with GDPR and CCPA regulations.</p>
+                <h4>4. Contact</h4>
+                <p>If you have any questions or data requests regarding our Privacy Policy, please reach out to our team at contact@astradev.tech.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Terms of Service Modal -->
+    <div id="terms-modal" class="modal-backdrop" style="display: none;" onclick="closeTermsModal(event)">
+        <div class="modal-card legal-modal-card" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <div class="modal-title">
+                    <i class="fa-solid fa-scale-balanced" style="color:var(--yt-red);"></i>
+                    <span>Terms of Service</span>
+                </div>
+                <button type="button" class="modal-close" onclick="closeTermsModal()">&times;</button>
+            </div>
+            <div class="legal-modal-body">
+                <p><strong>Last Updated:</strong> January 2026 • <strong>Website:</strong> astradev.tech</p>
+                <h4>1. Acceptance of Terms</h4>
+                <p>By accessing or using TubeGrab, you agree to comply with and be bound by these Terms of Service. If you do not agree to these terms, please do not use our service.</p>
+                <h4>2. Acceptable & Personal Use</h4>
+                <p>TubeGrab is provided as a utility for personal backup, research, fair use, and educational purposes. You agree not to use this service to infringe upon copyright, distribute pirated media, or violate the intellectual property rights of content creators.</p>
+                <h4>3. DMCA and Intellectual Property</h4>
+                <p>TubeGrab respects copyright owners. We do not host, store, or index copyrighted files on our servers. If you believe a link should be restricted from processing, copyright holders may contact us for immediate domain-level exclusion.</p>
+                <h4>4. Disclaimer of Warranty</h4>
+                <p>The service is provided on an "as is" and "as available" basis without warranties of any kind. TubeGrab is not responsible for any misuse of downloaded materials.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pass host IP to JS -->
+    <script>
+        window.LOCAL_HOST_IP = "{{ local_ip }}";
+    </script>
+    <!-- JavaScript Application Script -->
+    <script src="{{ url_for('static', filename='js/app.js') }}?v=3.2"></script>
+
+    <!-- Adsterra Social Bar Ad -->
+    <script src="https://pl31532413.profitableratecpmnetwork.com/b5/60/4f/b5604f0e0129f0cdba6986e3510a30a0.js"></script>
+</body>
+</html>

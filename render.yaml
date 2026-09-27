@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: tubegrab
+    runtime: docker
+    plan: free
+    region: oregon
+    branch: main
+    healthCheckPath: /api/storage-status
+    envVars:
+      - key: PORT
+        value: 5000
+      - key: PYTHONUNBUFFERED
+        value: "1"
