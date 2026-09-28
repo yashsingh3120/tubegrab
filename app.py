@@ -9,6 +9,7 @@ import subprocess
 import threading
 import tempfile
 from urllib.parse import urlparse
+import base64
 from flask import Flask, render_template, request, jsonify, abort, Response
 from flask_cors import CORS
 import yt_dlp
@@ -213,6 +214,40 @@ def is_valid_url(url):
     url = url.strip()
     return bool(re.match(r'^https?:\/\/[^\s/$.?#].[^\s]*$', url, re.IGNORECASE))
 
+def get_active_cookie_file():
+    """Detect and return active cookie file path from Render Secret Files, root, or environment."""
+    candidates = [
+        '/etc/secrets/cookies.txt',                         # Render Secret Files default mount
+        os.path.abspath('cookies.txt'),                    # Root or local cookies.txt
+        '/app/cookies.txt',                                # Docker default path
+        os.path.join(tempfile.gettempdir(), 'cookies.txt'),
+        os.path.join(tempfile.gettempdir(), 'yt_cookies.txt'),
+    ]
+    for c in candidates:
+        if os.path.exists(c) and os.path.getsize(c) > 0:
+            return os.path.abspath(c)
+
+    # Check environment variable YOUTUBE_COOKIES
+    raw = os.environ.get('YOUTUBE_COOKIES', '').strip()
+    if raw:
+        try:
+            if raw.startswith('base64:'):
+                raw = base64.b64decode(raw[7:]).decode('utf-8', errors='ignore')
+            elif '\\n' in raw and '\n' not in raw:
+                raw = raw.replace('\\n', '\n')
+            
+            target_path = os.path.join(tempfile.gettempdir(), 'yt_cookies.txt')
+            with open(target_path, 'w', encoding='utf-8') as f:
+                if not raw.startswith('# Netscape HTTP Cookie File'):
+                    f.write('# Netscape HTTP Cookie File\n')
+                f.write(raw)
+            if os.path.exists(target_path) and os.path.getsize(target_path) > 0:
+                return target_path
+        except Exception:
+            pass
+
+    return None
+
 def get_yt_dlp_options(extra_opts=None):
     """Generate resilient yt-dlp configuration with auto-fallback and cookies support."""
     opts = {
@@ -225,19 +260,7 @@ def get_yt_dlp_options(extra_opts=None):
         },
     }
 
-    # Automatically check for cookies.txt file or YOUTUBE_COOKIES environment variable
-    cookie_file = None
-    if os.path.exists('cookies.txt') and os.path.getsize('cookies.txt') > 0:
-        cookie_file = os.path.abspath('cookies.txt')
-    elif os.environ.get('YOUTUBE_COOKIES'):
-        temp_cookie_path = os.path.join(tempfile.gettempdir(), 'yt_cookies.txt')
-        try:
-            with open(temp_cookie_path, 'w', encoding='utf-8') as f:
-                f.write(os.environ.get('YOUTUBE_COOKIES').strip())
-            cookie_file = temp_cookie_path
-        except Exception:
-            pass
-
+    cookie_file = get_active_cookie_file()
     if cookie_file:
         opts['cookiefile'] = cookie_file
 
@@ -430,6 +453,17 @@ def purge_cache():
         return jsonify({'success': True, 'message': 'Temporary cache wiped. 0 MB used.'})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+@app.route('/api/cookies-status')
+def cookies_status():
+    """Diagnostic endpoint to verify if YouTube authentication cookies are loaded."""
+    cfile = get_active_cookie_file()
+    has_cookies = bool(cfile and os.path.exists(cfile) and os.path.getsize(cfile) > 0)
+    return jsonify({
+        'cookies_active': has_cookies,
+        'source': cfile if has_cookies else 'none',
+        'status': 'Authenticated (YouTube bypass active)' if has_cookies else 'No cookies (Render datacenter IP blocked by YouTube)'
+    })
 
 @app.route('/api/info', methods=['POST'])
 def get_video_info():
